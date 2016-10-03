@@ -9,9 +9,10 @@ import type {
   PingedComputerType,
 } from './types';
 
+const fetch = require('node-fetch');
 const fs = require('fs');
-const utils = require('./utils');
 const shell = require('./shell');
+const utils = require('./utils');
 
 const DEFAULT_FREQUENCY = 30 * 1000;
 
@@ -80,6 +81,8 @@ const WH = {
         )
       )
       .then((computers: Array<PingedComputerType>) => {
+        // console.log('Pinged Computers', computers);
+
         const oldMacs = LAST_KNOWN_COMPUTERS.map((computer) => computer.mac);
 
         const born = computers
@@ -90,8 +93,8 @@ const WH = {
           .filter((computer: PingedComputerType): boolean => !computer.ping)
           .filter((computer: PingedComputerType): boolean => oldMacs.includes(computer.mac));
 
-        console.log('Born', born);
-        console.log('Died', died);
+        // console.log('Born', born);
+        // console.log('Died', died);
 
         born.forEach(WH.makeCallback('appeared'));
         died.forEach(WH.makeCallback('removed'));
@@ -110,14 +113,14 @@ const WH = {
           });
       })
       .then(() => {
-        console.log('DONE');
-        console.log('');
+        // console.log('DONE');
+        // console.log('');
         const config = require('./config').get();
         WH.queueAddressLookup(config.frequency);
       })
       .catch((error) => {
-        console.log('error!', error);
-        console.log('');
+        console.log('Error!', error);
+        // console.log('');
         const config = require('./config').get();
         WH.queueAddressLookup(config.frequency);
       });
@@ -132,9 +135,24 @@ const WH = {
 
   makeCallback(callbackName: CallbackNames) {
     return (computer: PingedComputerType) => {
-      console.log('Computer', computer.alias, computer.mac, 'was', callbackName);
+      console.log(new Date(), `${computer.alias} ${computer.mac} ${callbackName}`);
       computer[callbackName].forEach((url) => {
-        console.log('  Calling', url);
+        const uri = require('util').format(url, encodeURIComponent(computer.alias));
+        console.log('  Calling', uri);
+        fetch(uri, {
+          headers: {
+            'User-Agent': 'welcome-home v1.0',
+          },
+        })
+          .then((result) => {
+            return result.text();
+          })
+          .then((text) => {
+            console.log('got', text);
+          })
+          .catch((err) => {
+            console.log('error', err);
+          });
       });
     };
 

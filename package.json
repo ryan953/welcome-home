@@ -8,7 +8,8 @@
     "babel-preset-react": "^6.11.1"
   },
   "dependencies": {
-    "jest-cli": "^15.1.1"
+    "jest-cli": "^15.1.1",
+    "node-fetch": "^1.6.3"
   },
   "scripts": {
     "start": "babel src -d build && node build/index.js",
