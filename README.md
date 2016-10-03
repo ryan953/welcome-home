@@ -3,7 +3,8 @@
 ```
 git clone https://github.com/ryan953/welcome-home.git
 npm install
-<edit config.json>
+cp config.json.example config.json
+open config.json
 npm start
 ```
 
