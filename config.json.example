@@ -1,0 +1,16 @@
+{
+  "broadcast": "192.168.0.255",
+  "frequency": 5000,
+  "hosts": [
+    {
+      "mac": "aa:bb:cc:dd:ee:ff",
+      "alias": "My iPhone",
+      "appeared": [
+        "http://example.com?q=%s&hello"
+      ],
+      "removed": [
+        "http://example.com?q=%s&byebye"
+      ]
+    }
+  ]
+}
