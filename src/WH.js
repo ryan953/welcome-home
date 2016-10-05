@@ -18,8 +18,9 @@ const DEFAULT_FREQUENCY = 30 * 1000;
 
 let LAST_KNOWN_COMPUTERS: Array<ComputerType> = [];
 
-const WH = {
+let _timeout: ?number = null;
 
+const WH = {
   nicsToComputers(nics: Array<NICType>): Array<ComputerType> {
     const config = require('./config').get();
     const isImportantMacAddresss = utils.isInsideListOf(config.macs);
@@ -130,7 +131,11 @@ const WH = {
   queueAddressLookup(interval) {
     interval = interval == null ? DEFAULT_FREQUENCY : interval;
 
-    setTimeout(WH.run, interval);
+    _timeout = setTimeout(WH.run, interval);
+  },
+
+  stopListening() {
+    _timeout && clearTimeout(_timeout);
   },
 
   makeCallback(callbackName: CallbackNames) {
