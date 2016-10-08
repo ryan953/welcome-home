@@ -12,6 +12,7 @@
     "node-fetch": "^1.6.3"
   },
   "scripts": {
+    "build": "babel src -d build",
     "start": "babel src -d build && node build/index.js",
     "jest": "jest"
   },

@@ -22,7 +22,13 @@ let _timeout: ?number = null;
 
 const WH = {
   nicsToComputers(nics: Array<NICType>): Array<ComputerType> {
-    const config = require('./config').get();
+    let config;
+    try {
+      config = require('./config').get();
+    } catch (e) {
+      console.log('config failed', e);
+    }
+    // console.log('found config', config);
     const isImportantMacAddresss = utils.isInsideListOf(config.macs);
     return nics
       .filter((nic: NICType): boolean => isImportantMacAddresss(nic.mac))
@@ -94,8 +100,8 @@ const WH = {
           .filter((computer: PingedComputerType): boolean => !computer.ping)
           .filter((computer: PingedComputerType): boolean => oldMacs.includes(computer.mac));
 
-        // console.log('Born', born);
-        // console.log('Died', died);
+        console.log('Born', born);
+        console.log('Died', died);
 
         born.forEach(WH.makeCallback('appeared'));
         died.forEach(WH.makeCallback('removed'));
