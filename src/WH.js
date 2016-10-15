@@ -163,7 +163,7 @@ const WH = {
     if (typeof fetchParams == 'string') {
       console.log('  Calling', 'GET', fetchParams);
       http.get(fetchParams, (response) => {
-        console.log('  Got Response', response);
+        console.log('  Got Response', response.statusCode);
       });
     } else {
       const {Content, ...options} = fetchParams;
@@ -190,7 +190,7 @@ const WH = {
 
       console.log('  Calling', options.method, options.hostname, options);
       const req = httpModule.request(options, (response) => {
-        console.log('Got response:', response.statusCode, response);
+        console.log('Got response:', response.statusCode);
         // consume response body
         response.resume();
       });
