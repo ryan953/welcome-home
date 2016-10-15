@@ -161,7 +161,7 @@ const WH = {
 
   fetchEndpoint(fetchParams: FetchParams) {
     if (typeof fetchParams == 'string') {
-      console.log('  Calling', 'GET', fetchParams);
+      console.log('  Calling', 'GET', new Date(), fetchParams);
       http.get(fetchParams, (response) => {
         console.log('  Got Response', response.statusCode);
       });
@@ -188,7 +188,7 @@ const WH = {
 
       const httpModule = options.protocol == 'https:' ? https : http;
 
-      console.log('  Calling', options.method, options.hostname, options);
+      console.log('  Calling', options.method, new Date(), options.hostname, options);
       const req = httpModule.request(options, (response) => {
         console.log('Got response:', response.statusCode);
         // consume response body
