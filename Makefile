@@ -39,6 +39,8 @@ endef
 .PHONEY: remove-service
 .PHONEY: print-service
 
+default: build-js
+
 install:
 	npm install
 

@@ -1,16 +1,21 @@
 /* @flow */
 
 import type {
-  CallbackNames,
+  CallbackCollection,
+  CallbackName,
   ComputerConfigType,
   ComputerType,
   ConfigType,
+  FetchParams,
   NICType,
   PingedComputerType,
+  RequestMethod,
 } from './types';
 
-const fetch = require('node-fetch');
 const fs = require('fs');
+const http = require('http');
+const https = require('https');
+const querystring = require('querystring');
 const shell = require('./shell');
 const utils = require('./utils');
 
@@ -27,6 +32,7 @@ const WH = {
       config = require('./config').get();
     } catch (e) {
       console.log('config failed', e);
+      throw e;
     }
     // console.log('found config', config);
     const isImportantMacAddresss = utils.isInsideListOf(config.macs);
@@ -54,7 +60,7 @@ const WH = {
   pingComputers(computers: Array<ComputerType>): Promise<Array<PingedComputerType>> {
     const promises = [];
 
-    const objects = computers
+    const pingedComputers = computers
       .map((computer: ComputerType): PingedComputerType => {
         return {
           ip: computer.ip,
@@ -69,12 +75,12 @@ const WH = {
         promises.push(
           shell.pingIPAddress(computer.ip || null)
             .then((ping) => computer.ping = ping)
-      );
-      return computer;
-    });
+        );
+        return computer;
+      });
 
     return Promise.all(promises).then((pings): Array<PingedComputerType> => {
-      return objects;
+      return pingedComputers;
     });
   },
 
@@ -144,29 +150,58 @@ const WH = {
     _timeout && clearTimeout(_timeout);
   },
 
-  makeCallback(callbackName: CallbackNames) {
+  makeCallback(callbackName: CallbackName) {
     return (computer: PingedComputerType) => {
       console.log(new Date(), `${computer.alias} ${computer.mac} ${callbackName}`);
-      computer[callbackName].forEach((url) => {
-        const uri = require('util').format(url, encodeURIComponent(computer.alias));
-        console.log('  Calling', uri);
-        fetch(uri, {
-          headers: {
-            'User-Agent': 'welcome-home v1.0',
-          },
-        })
-          .then((result) => {
-            return result.text();
-          })
-          .then((text) => {
-            console.log('got', text);
-          })
-          .catch((err) => {
-            console.log('error', err);
-          });
-      });
+      computer[callbackName].forEach(
+        (fetchParams) => this.fetchEndpoint(fetchParams)
+      );
     };
+  },
 
+  fetchEndpoint(fetchParams: FetchParams) {
+    if (typeof fetchParams == 'string') {
+      console.log('  Calling', 'GET', fetchParams);
+      http.get(fetchParams, (response) => {
+        console.log('  Got Response', response);
+      });
+    } else {
+      const {Content, ...options} = fetchParams;
+
+      let data = null;
+      if (Content && Content['application/x-www-form-urlencoded']) {
+        data = querystring.stringify(
+          Content['application/x-www-form-urlencoded']
+        );
+
+        options.headers = {
+          ...options.headers,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(data)
+        };
+      }
+
+      options.headers = {
+        ...options.headers,
+        'User-Agent': 'ryan953/welcome-home v1.0',
+      };
+
+      const httpModule = options.protocol == 'https:' ? https : http;
+
+      console.log('  Calling', options.method, options.hostname, options);
+      const req = httpModule.request(options, (response) => {
+        console.log('Got response:', response.statusCode, response);
+        // consume response body
+        response.resume();
+      });
+      req.on('error', (error) => {
+        console.log('request error', error);
+      });
+      if (data) {
+        req.write(data);
+      }
+      req.end();
+    }
   },
 
 };

@@ -5,12 +5,20 @@
     {
       "mac": "aa:bb:cc:dd:ee:ff",
       "alias": "My iPhone",
-      "appeared": [
-        "http://example.com?q=%s&hello"
-      ],
-      "removed": [
-        "http://example.com?q=%s&byebye"
-      ]
+      "appeared": {
+        "GET": [
+          "http://example.com?q=%s&hello"
+        ],
+        "POST": [
+        ],
+      },
+      "removed": {
+        "GET": [
+          "http://example.com?q=%s&byebye"
+        ],
+        "POST": [
+        ],
+      }
     }
   ]
 }

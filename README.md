@@ -22,12 +22,20 @@ The config file with one device configured looks like this:
     {
       "mac": "aa:bb:cc:dd:ee:ff",
       "alias": "Some Nice Name",
-      "appeared": [
-        "http://example.com?alias=%s"
-      ],
-      "removed": [
-        "http://example.com?alias=%s"
-      ]
+      "appeared": {
+        "GET": [
+          "http://example.com?message=Welcome"
+        ],
+        "POST": [
+        ],
+      },
+      "removed": {
+        "GET": [
+        ],
+        "POST": [
+          "http://example.com?message=Bye"
+        ]
+      }
     }
   ]
 }
